@@ -1,37 +1,32 @@
 <template>
   <div>
-    <keep-alive> 
-      <component 
-        :is="currentStep" 
-        ref="currentStep"
-        @update="processStep" 
-        :wizard-data="form"
-      ></component>
-    </keep-alive>
-    <div class="progress-bar">
-      <div :style="`width: ${progress}%;`"></div>
-    </div>
+    <div v-if="wizardInProgress">
+      <keep-alive>
+        <component :is="currentStep" ref="currentStep" @update="processStep" :wizard-data="form"></component>
+      </keep-alive>
+      <div class="progress-bar">
+        <div :style="`width: ${progress}%;`"></div>
+      </div>
 
-    <!-- Actions -->
-    <div class="buttons">
-      <button
-        @click="goBack"
-        v-if="currentStepNumber > 1"
-        class="btn-outlined"
-      >Back
-      </button>
-      <button
-        @click="goNext"
-        :disabled="!canGoNext"
-        class="btn"
-      >Next</button>
-    </div>
+      <!-- Actions -->
+      <div class="buttons">
+        <button @click="goBack" v-if="currentStepNumber > 1" class="btn-outlined">Back
+        </button>
+        <button @click="goNext" :disabled="!canGoNext" class="btn">{{isLastStep ? "Complete order" : "Next"}}</button>
+      </div>
 
-    <pre><code>{{form}}</code></pre>
+      <pre><code>{{form}}</code></pre>
+    </div>
+    <div v-else>
+      <h1 class="title">Thank You</h1>
+      <h2 class="subtitle">We are looking forward to shipping your order!</h2>
+      <p class="text-center"><a href="https://github.com/niyorn" class="btn">Go somewhere cool</a></p>
+    </div>
   </div>
 </template>
 
 <script>
+import {postFormToDB} from '../api'
 import FormPlanPicker from './FormPlanPicker'
 import FormUserDetails from './FormUserDetails'
 import FormAddress from './FormAddress'
@@ -75,6 +70,12 @@ export default {
     },
     currentStep() {
       return this.steps[this.currentStepNumber -1]
+    },
+    isLastStep() {
+      return this.currentStepNumber === this.length
+    },
+    wizardInProgress() {
+      return this.currentStepNumber <= this.length
     }
   },
   methods: {
@@ -90,8 +91,22 @@ export default {
       this.currentStepNumber++
       // this.canGoNext = false
       this.$nextTick(()=>{
-        this.canGoNext = !this.$refs.currentStep.$v.invalid
+        this.canGoNext = !this.$refs.currentStep.$v.$invalid
       })
+    },
+    nextButton() {
+      if(this.isLastStep) {
+        this.submitOrder()
+      } else {
+        this.goNext()
+      }
+    },
+    submitOrder() {
+      postFormToDB(this.form)
+        .then(()=> {
+          console.log('form submitted', this.form)
+          this.currentStepNumber++
+        })
     }
   }
 }
