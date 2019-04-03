@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="wizardInProgress">
+    <div v-if="wizardInProgress" v-show="asyncState !== 'pending'">
       <keep-alive>
         <component :is="currentStep" ref="currentStep" @update="processStep" :wizard-data="form"></component>
       </keep-alive>
@@ -21,6 +21,13 @@
       <h1 class="title">Thank You</h1>
       <h2 class="subtitle">We are looking forward to shipping your order!</h2>
       <p class="text-center"><a href="https://github.com/niyorn" class="btn">Go somewhere cool</a></p>
+    </div>
+
+    <div class="loading-wrapper" v-if="asyncState === 'pending'">
+      <div class="loader">
+        <img src="/spinner.svg" alt="">
+        <p>Please wait, we're hitting our servers!</p>
+      </div>
     </div>
   </div>
 </template>
@@ -43,6 +50,7 @@ export default {
     return {
       currentStepNumber: 1,
       canGoNext: false,
+      asyncState: null,
       steps: [
         'FormPlanPicker',
         'FormUserDetails',
@@ -78,6 +86,7 @@ export default {
       return this.currentStepNumber <= this.length
     }
   },
+  validation: {},
   methods: {
     processStep(step) {
       Object.assign(this.form, step.data)
@@ -102,11 +111,13 @@ export default {
       }
     },
     submitOrder() {
-      postFormToDB(this.form)
-        .then(()=> {
-          console.log('form submitted', this.form)
-          this.currentStepNumber++
-        })
+    this.asyncState = 'pending'
+    postFormToDB(this.form)
+      .then(() => {
+        console.log('form submitted', this.form)
+        this.asyncState = 'success'
+        this.currentStepNumber++
+      })
     }
   }
 }
