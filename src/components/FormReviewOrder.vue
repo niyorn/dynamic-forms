@@ -103,6 +103,7 @@
         return total 
       }
     },
+    validation: {},
     methods: {
       submit() {
         this.$emit('update', {
