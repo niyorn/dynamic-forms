@@ -59,14 +59,14 @@
     },
     methods: {
       submit() {
-        if(!this.$v.$invalid) {
           this.$emit('update', {
-            email: this.form.email,
-            password: this.form.password,
-            name: this.form.name
-          })
-        }
-
+            data: {
+              email: this.form.email,
+              password: this.form.password,
+              name: this.form.name
+            },
+            valid: !this.$v.$invalid
+        })
       }
     }
   }
