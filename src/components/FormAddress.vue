@@ -49,6 +49,9 @@
         }
       }
     },
+    activated() {
+      this.form.recipient = this.wizardData.name
+    },
     methods: {
       submit() {
         this.$emit('update', {
