@@ -90,27 +90,33 @@
       },
       checkIfUserExists() {
         if(!this.$v.form.email.$invalid) {
+          this.$emit('updateAsyncState', 'pending')
           return checkIfUserExistsInDB(this.form.email)
             .then(()=> {
               this.existingUser = true
               this.emailCheckedInDb = true
+              this.$emit('updateAsyncState', 'succes')
             })
             .catch(()=> {
               this.existingUser = false
               this.emailCheckedInDb = true
+              this.$emit('updateAsyncState', 'success')
             })
         }
       },
       login() {
         this.wrongPassword = false
         if(!this.$v.form.password.$invalid) {
+          this.$emit('updateAsyncState', 'pending')
           return authenticateUser(this.form.email, this.form.password)
             .then(user=> {
               this.form.name = user.name
               this.submit()
+              this.$emit('updateAsyncState', 'success')
             })
             .catch(()=> {
               this.wrongPassword = true
+              this.$emit('updateAsyncState', 'success')
             })
         }
       },

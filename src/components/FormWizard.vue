@@ -2,7 +2,7 @@
   <div>
     <div v-if="wizardInProgress" v-show="asyncState !== 'pending'">
       <keep-alive>
-        <component :is="currentStep" ref="currentStep" @update="processStep" :wizard-data="form"></component>
+        <component :is="currentStep" ref="currentStep" @update="processStep" :wizard-data="form" @updateAsyncState="updateAsyncState"></component>
       </keep-alive>
       <div class="progress-bar">
         <div :style="`width: ${progress}%;`"></div>
@@ -88,6 +88,9 @@ export default {
   },
   validation: {},
   methods: {
+    updateAsyncState(state) {
+      this.asyncState = state
+    },
     processStep(step) {
       Object.assign(this.form, step.data)
       this.canGoNext = step.valid
